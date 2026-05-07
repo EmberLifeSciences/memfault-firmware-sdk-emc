@@ -218,9 +218,8 @@ static int prv_create_socket(struct addrinfo **res, const char *host, int port_n
 }
 
 static int prv_configure_tls_socket(int sock_fd, const char *host) {
-  const sec_tag_t sec_tag_opt[] = { kMemfaultRootCert_DigicertRootG2,
-                                    kMemfaultRootCert_AmazonRootCa1,
-                                    kMemfaultRootCert_DigicertRootCa };
+  /* RT-1000-774: single sec_tag to reduce nRF91 modem RAM during TLS handshake. */
+  const sec_tag_t sec_tag_opt[] = { kMemfaultRootCert_DigicertRootG2 };
   int rv = setsockopt(sock_fd, SOL_TLS, TLS_SEC_TAG_LIST, sec_tag_opt, sizeof(sec_tag_opt));
   if (rv != 0) {
     return rv;
