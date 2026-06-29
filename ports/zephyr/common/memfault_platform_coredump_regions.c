@@ -46,7 +46,16 @@ size_t memfault_zephyr_coredump_get_regions(const sCoredumpCrashInfo *crash_info
   region_idx++;
 
   #if defined(CONFIG_ARM)
-  const bool msp_was_active = (crash_info->exception_reg_state->exc_return & (1 << 2)) == 0;
+    //
+    // RT-1000-774: memfault_coredump_storage_compute_size_required()
+    // (memfault_fault_handling_arm.c) calls this with crash_info->exception_reg_state
+    // NULL when sizing storage outside a real fault. Without this guard the deref
+    // lands at offset 0x24, which is in the TF-M secure region on the nRF9151,
+    // and produces a SECURE FAULT / AUVIOL on every `mflt coredump_size`
+    //
+  const bool msp_was_active =
+    (crash_info->exception_reg_state != NULL) &&
+    ((crash_info->exception_reg_state->exc_return & (1 << 2)) == 0);
 
   if (msp_was_active) {
     // System crashed in an ISR but the running task state is on PSP so grab that too
