@@ -691,9 +691,6 @@ ssize_t memfault_zephyr_port_post_data_return_size(void) {
 
   if (rv == 0) {
     rv = memfault_zephyr_port_http_upload_sdk_data(&ctx);
-  }
-
-  if (rv == 0) {
     memfault_zephyr_port_http_close_socket(&ctx);
   }
 
